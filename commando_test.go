@@ -1,8 +1,8 @@
 package commando
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -54,7 +54,7 @@ func testStandaloneExec() {
 }
 
 func ExampleParse() {
-	os.Args = []string{"root", "sub", "--path", "/test/stub",}
+	os.Args = []string{"root", "sub", "--path", "/test/stub"}
 	setupDummyTree()
 	root.Children["sub"].Execute = testStandaloneExec
 	root.Parse()
@@ -67,7 +67,7 @@ func testOptionExec() {
 }
 
 func ExampleParseWithOption() {
-	os.Args = []string{"root", "sub", "--path", "/test/stub",}
+	os.Args = []string{"root", "sub", "--path", "/test/stub"}
 	setupDummyTree()
 	root.Children["sub"].Execute = testOptionExec
 	root.Children["sub"].AddOption("path", "A path to a thing", true, "--path")

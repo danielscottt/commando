@@ -1,35 +1,35 @@
 package commando
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"os"
-	"text/tabwriter"
-	"strings"
 	"regexp"
+	"strings"
+	"text/tabwriter"
 )
 
 var tw *tabwriter.Writer
 
 // Command is the base type for all commands.
 type Command struct {
-	Name string                  // Name of command, typically how a command is called from the cli.
-	Description string           // A Description of the command, printed in usage.
-	Options map[string]*Option   // A map of the flags attached to this command, they are looked up by their name.
-	Children map[string]*Command // A map of all the subcommands, looked up by their name.
-	Parent *Command              // A pointer to the command's parent.  not set in root command.
-	Execute func()               // The function to run when executing a command.
+	Name        string              // Name of command, typically how a command is called from the cli.
+	Description string              // A Description of the command, printed in usage.
+	Options     map[string]*Option  // A map of the flags attached to this command, they are looked up by their name.
+	Children    map[string]*Command // A map of all the subcommands, looked up by their name.
+	Parent      *Command            // A pointer to the command's parent.  not set in root command.
+	Execute     func()              // The function to run when executing a command.
 
 }
 
 // Option is the type for flag options like "-p" or "--path"
 type Option struct {
-	Name string        // Name of Option, its name is used to retrieve its value.
-	Description string // A Description of the option, used when printing usage.
-	Flags []string     // The flags associated with the option.
-	Value interface{}  // Where the value of a given flag is scanned into.
-	Present bool       // Used to determine whether or not a flag is present, typically for a bool type flag.
-	Required bool      // If a flag is required and not present, usage for owning command is printed.
+	Name        string      // Name of Option, its name is used to retrieve its value.
+	Description string      // A Description of the option, used when printing usage.
+	Flags       []string    // The flags associated with the option.
+	Value       interface{} // Where the value of a given flag is scanned into.
+	Present     bool        // Used to determine whether or not a flag is present, typically for a bool type flag.
+	Required    bool        // If a flag is required and not present, usage for owning command is printed.
 }
 
 var tabWriter *tabwriter.Writer
@@ -51,7 +51,7 @@ func (c *Command) PrintHelp() {
 		fmt.Println("\nUsage:", c.Name, "COMMAND [args..]\n")
 		fmt.Println(c.Description, "\n")
 		fmt.Println("Commands:")
-		for _, cmd := range(c.Children) {
+		for _, cmd := range c.Children {
 			PrintFields(true, 4, cmd.Name, cmd.Description)
 		}
 	} else {
@@ -61,7 +61,7 @@ func (c *Command) PrintHelp() {
 		for _, opt := range c.Options {
 			PrintFields(true, 4, strings.Join(opt.Flags, ", "), opt.Description)
 		}
-	
+
 	}
 }
 

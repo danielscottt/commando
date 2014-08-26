@@ -28,7 +28,6 @@ import (
 
 var root, cmd1 *commando.Command
 
-
 func runCmd1() {
         commando.PrintFields(false, 0, "HI", "DOOD")
         commando.PrintFields(false, 0, "for path you said:", cmd1.Options["path"].Value)
