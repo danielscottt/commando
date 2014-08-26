@@ -76,7 +76,6 @@ func (c *Command) hasChildren() bool {
 }
 
 // AddOption is used to add an option (Flag) to a command.
-// Ex: cmd.AddOption("path", "Path to a thing", true, "-p", "--path")
 func (c *Command) AddOption(name string, descrip string, req bool, flags ...string) {
 	if c.Options == nil {
 		c.Options = make(map[string]*Option)
