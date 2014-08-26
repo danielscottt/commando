@@ -13,30 +13,29 @@ var tw *tabwriter.Writer
 
 // Command is the base type for all commands.
 type Command struct {
-	Name string
-	Description string
-	Options map[string]*Option
-	Children map[string]*Command
-	Parent *Command
-	Execute func()
+	Name string                  // Name of command, typically how a command is called from the cli.
+	Description string           // A Description of the command, printed in usage.
+	Options map[string]*Option   // A map of the flags attached to this command, they are looked up by their name.
+	Children map[string]*Command // A map of all the subcommands, looked up by their name.
+	Parent *Command              // A pointer to the command's parent.  not set in root command.
+	Execute func()               // The function to run when executing a command.
 
 }
 
 // Option is the type for flag options like "-p" or "--path"
 type Option struct {
-	Name string
-	Description string
-	Flags []string
-	Value interface{}
-	Present bool
-	Required bool
+	Name string        // Name of Option, its name is used to retrieve its value.
+	Description string // A Description of the option, used when printing usage.
+	Flags []string     // The flags associated with the option.
+	Value interface{}  // Where the value of a given flag is scanned into.
+	Present bool       // Used to determine whether or not a flag is present, typically for a bool type flag.
+	Required bool      // If a flag is required and not present, usage for owning command is printed.
 }
 
-// tabWriter is a IO Writer that formats output to stdout in evenly spaced columns.
-// It is used by PrintFields to output data in a standard Unix field / column.
 var tabWriter *tabwriter.Writer
 
 // AddSubcommand attaches a command to a parent, as well as sets the parent property on the child command.
+// Commands can be limitlessly nested (though, I don't recommend it).
 func (c *Command) AddSubCommand(child *Command) {
 	if c.Children == nil {
 		c.Children = make(map[string]*Command)
@@ -45,7 +44,7 @@ func (c *Command) AddSubCommand(child *Command) {
 	c.Children[child.Name] = child
 }
 
-// Print Help is used to print info and usage for any command.
+// PrintHelp is used to print info and usage for any command.
 // It knows if a command is the last in the chain, and if so, prints usage with just Options (Flags)
 func (c *Command) PrintHelp() {
 	if c.hasChildren() {
@@ -115,6 +114,10 @@ func (c *Command) Parse() {
 	defer tw.Flush()
 
 	if len(os.Args) == 1 {
+		c.PrintHelp()
+		return
+	}
+	if os.Args[1] == "-h" || os.Args[1] == "--help" {
 		c.PrintHelp()
 		return
 	}
