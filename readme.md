@@ -5,7 +5,7 @@ A CLI Parser for Go
 
 [![Build Status](https://travis-ci.org/danielscottt/commando.svg?branch=master)](https://travis-ci.org/danielscottt/commando)
 
-godocs: http://godoc.org/github.com/danielscottt/commando
+[![GoDoc](https://godoc.org/github.com/danielscottt/commando?status.svg)](https://godoc.org/github.com/danielscottt/commando)
 
 ## Overview
 
