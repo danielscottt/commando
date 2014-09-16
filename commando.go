@@ -142,12 +142,33 @@ func (c *Command) findChild() *Command {
 
 // setOptions is used to retrieve flagged options  and set their values.
 func (c *Command) setOptions() error {
+
+	seen := make(map[string]string)
+
 	for i, arg := range os.Args {
 		for _, opt := range c.Options {
 			for _, flag := range opt.Flags {
 				if match, _ := regexp.MatchString(arg, flag); match {
-					opt.Value = os.Args[i+1]
-					opt.Present = true
+					if opt.Value != nil {
+						switch val := opt.Value.(type) {
+						case []string:
+							if _, present := seen[os.Args[i+1]]; !present {
+								opt.Value = append(opt.Value.([]string), os.Args[i+1])
+								seen[os.Args[i+1]] = os.Args[i+1]
+							}
+						case string:
+							optArray := []string{val}
+							if _, present := seen[os.Args[i+1]]; !present {
+								seen[os.Args[i+1]] = os.Args[i+1]
+								optArray = append(optArray, os.Args[i+1])
+							}
+							opt.Value = optArray
+						}
+					} else {
+						opt.Value = os.Args[i+1]
+						seen[os.Args[i+1]] = os.Args[i+1]
+						opt.Present = true
+					}
 				}
 			}
 		}
