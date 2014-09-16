@@ -147,27 +147,36 @@ func (c *Command) setOptions() error {
 
 	for i, arg := range os.Args {
 		for _, opt := range c.Options {
-			for _, flag := range opt.Flags {
-				if match, _ := regexp.MatchString(arg, flag); match {
-					if opt.Value != nil {
-						switch val := opt.Value.(type) {
-						case []string:
-							if _, present := seen[os.Args[i+1]]; !present {
-								opt.Value = append(opt.Value.([]string), os.Args[i+1])
-								seen[os.Args[i+1]] = os.Args[i+1]
+			if opt.Value == nil {
+				for _, flag := range opt.Flags {
+					if match, _ := regexp.MatchString(arg, flag); match {
+						if opt.Value != nil {
+							switch val := opt.Value.(type) {
+							case []string:
+								if _, present := seen[os.Args[i+1]]; !present {
+									opt.Value = append(opt.Value.([]string), os.Args[i+1])
+									seen[os.Args[i+1]] = os.Args[i+1]
+								}
+							case string:
+								optArray := []string{val}
+								if _, present := seen[os.Args[i+1]]; !present {
+									seen[os.Args[i+1]] = os.Args[i+1]
+									optArray = append(optArray, os.Args[i+1])
+								}
+								opt.Value = optArray
 							}
-						case string:
-							optArray := []string{val}
-							if _, present := seen[os.Args[i+1]]; !present {
-								seen[os.Args[i+1]] = os.Args[i+1]
-								optArray = append(optArray, os.Args[i+1])
-							}
-							opt.Value = optArray
+						} else {
+							opt.Value = os.Args[i+1]
+							seen[os.Args[i+1]] = os.Args[i+1]
+							opt.Present = true
 						}
-					} else {
-						opt.Value = os.Args[i+1]
-						seen[os.Args[i+1]] = os.Args[i+1]
-						opt.Present = true
+					}
+				}
+			} else {
+				switch v := opt.Value.(type) {
+				case []string:
+					if len(v) == 1 {
+						opt.Value = opt.Value.([]string)[0]
 					}
 				}
 			}
