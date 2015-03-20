@@ -210,6 +210,12 @@ func (c *Command) executeChildren() {
 			}
 			return
 		} else {
+			if argIndex+1 <= len(os.Args) {
+				if os.Args[argIndex] == "--help" || os.Args[argIndex] == "-h" {
+					c.PrintHelp()
+					return
+				}
+			}
 			c.Execute()
 		}
 	}
