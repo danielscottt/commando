@@ -48,21 +48,21 @@ func (c *Command) AddSubCommand(child *Command) {
 // PrintHelp is used to print info and usage for any command.
 // It knows if a command is the last in the chain, and if so, prints usage with just Options (Flags)
 func (c *Command) PrintHelp() {
+	uc := strings.Join(os.Args[:argIndex], " ")
 	if c.hasChildren() {
-		fmt.Println("\nUsage:", c.Name, "COMMAND [args..]\n")
+		fmt.Println("\nUsage:", uc, "COMMAND [args..]\n")
 		fmt.Println(c.Description, "\n")
 		fmt.Println("Commands:")
 		for _, cmd := range c.Children {
 			PrintFields(true, 4, cmd.Name, cmd.Description)
 		}
 	} else {
-		fmt.Printf("\nUsage: %s %s [options...]\n\n", c.Parent.Name, c.Name)
+		fmt.Printf("\nUsage: %s [options...]\n\n", uc)
 		fmt.Println(c.Description)
 		fmt.Println("\nOptions:")
 		for _, opt := range c.Options {
 			PrintFields(true, 4, strings.Join(opt.Flags, ", "), opt.Description)
 		}
-
 	}
 }
 
