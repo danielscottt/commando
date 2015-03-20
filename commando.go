@@ -9,7 +9,10 @@ import (
 	"text/tabwriter"
 )
 
-var tw *tabwriter.Writer
+var (
+	tw       *tabwriter.Writer
+	argIndex int
+)
 
 // Command is the base type for all commands.
 type Command struct {
@@ -31,8 +34,6 @@ type Option struct {
 	Present     bool        // Used to determine whether or not a flag is present, typically for a bool type flag.
 	Required    bool        // If a flag is required and not present, usage for owning command is printed.
 }
-
-var tabWriter *tabwriter.Writer
 
 // AddSubcommand attaches a command to a parent, as well as sets the parent property on the child command.
 // Commands can be limitlessly nested (though, I don't recommend it).
@@ -192,15 +193,19 @@ func (c *Command) setOptions() error {
 }
 
 // executeChildren is the recurive part of Parse.
-// It determines if a command has children, and if it does, executes them.
-// If not, it continues to recurse.
+// It determines if a command has children.  If it does, it continues to recurse.
+// If not, it executes.
 func (c *Command) executeChildren() {
 	r, _ := regexp.Compile("^-{1,2}.*")
 	if !r.MatchString(os.Args[1]) {
+		argIndex++
 		if c.hasChildren() {
 			if child := c.findChild(); child != nil {
 				child.Parse()
 			} else {
+				if argIndex+1 <= len(os.Args) {
+					fmt.Println("unknown command: " + os.Args[argIndex])
+				}
 				c.PrintHelp()
 			}
 			return
