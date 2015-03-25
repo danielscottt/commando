@@ -54,6 +54,7 @@ func testStandaloneExec() {
 }
 
 func ExampleParse() {
+	argIndex = 0
 	os.Args = []string{"root", "sub", "--path", "/test/stub"}
 	setupDummyTree()
 	root.Children["sub"].Execute = testStandaloneExec
@@ -67,6 +68,7 @@ func testOptionExec() {
 }
 
 func ExampleParseWithOption() {
+	argIndex = 0
 	os.Args = []string{"root", "sub", "--path", "/test/stub"}
 	setupDummyTree()
 	root.Children["sub"].Execute = testOptionExec
