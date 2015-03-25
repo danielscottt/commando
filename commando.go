@@ -118,7 +118,7 @@ func (c *Command) Parse() {
 		c.PrintHelp()
 		return
 	}
-	if os.Args[1] == "-h" || os.Args[1] == "--help" {
+	if os.Args[len(os.Args)-1] == "-h" || os.Args[len(os.Args)-1] == "--help" {
 		c.PrintHelp()
 		return
 	}
