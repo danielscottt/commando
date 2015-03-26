@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	tw       *tabwriter.Writer
-	argIndex int
+	tw       = tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+	argIndex = 0
 )
 
 // Command is the base type for all commands.
@@ -110,7 +110,8 @@ func PrintFields(indent bool, width int, fields ...interface{}) {
 // It recurses all the children of a command, finally executing the last command in the chain.
 func (c *Command) Parse() {
 
-	tw = tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+	argIndex++
+
 	defer tw.Flush()
 
 	if len(os.Args) == 1 {
@@ -125,6 +126,8 @@ func (c *Command) Parse() {
 	if err := c.setOptions(); err == nil {
 		c.executeChildren()
 	} else {
+
+		fmt.Println(err.Error())
 		c.PrintHelp()
 	}
 }
@@ -141,12 +144,14 @@ func (c *Command) findChild() *Command {
 	return child
 }
 
-// setOptions is used to retrieve flagged options  and set their values.
+// setOptions is used to retrieve flagged options and set their values.
 func (c *Command) setOptions() error {
 
 	seen := make(map[string]string)
 
-	for i, arg := range os.Args {
+	remain := os.Args[argIndex:]
+
+	for i, arg := range remain {
 		for _, opt := range c.Options {
 			if opt.Value == nil {
 				for _, flag := range opt.Flags {
@@ -154,21 +159,27 @@ func (c *Command) setOptions() error {
 						if opt.Value != nil {
 							switch val := opt.Value.(type) {
 							case []string:
-								if _, present := seen[os.Args[i+1]]; !present {
-									opt.Value = append(opt.Value.([]string), os.Args[i+1])
-									seen[os.Args[i+1]] = os.Args[i+1]
+								if _, present := seen[remain[i+1]]; !present {
+									opt.Value = append(opt.Value.([]string), remain[i+1])
+									seen[remain[i+1]] = remain[i+1]
 								}
 							case string:
 								optArray := []string{val}
-								if _, present := seen[os.Args[i+1]]; !present {
-									seen[os.Args[i+1]] = os.Args[i+1]
-									optArray = append(optArray, os.Args[i+1])
+								if _, present := seen[remain[i+1]]; !present {
+									seen[remain[i+1]] = remain[i+1]
+									optArray = append(optArray, remain[i+1])
 								}
 								opt.Value = optArray
 							}
 						} else {
-							opt.Value = os.Args[i+1]
-							seen[os.Args[i+1]] = os.Args[i+1]
+							if len(remain) >= i+2 {
+								if strings.Index(remain[i+1], "-") == 0 {
+									opt.Value = true
+								} else {
+									opt.Value = remain[i+1]
+									seen[remain[i+1]] = remain[i+1]
+								}
+							}
 							opt.Present = true
 						}
 					}
@@ -185,7 +196,7 @@ func (c *Command) setOptions() error {
 	}
 	for _, opt := range c.Options {
 		if opt.Required && opt.Value == nil {
-			err := errors.New("required option missing")
+			err := errors.New("required option missing: " + opt.Name)
 			return err
 		}
 	}
@@ -198,7 +209,6 @@ func (c *Command) setOptions() error {
 func (c *Command) executeChildren() {
 	r, _ := regexp.Compile("^-{1,2}.*")
 	if !r.MatchString(os.Args[1]) {
-		argIndex++
 		if c.hasChildren() {
 			if child := c.findChild(); child != nil {
 				child.Parse()
