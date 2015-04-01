@@ -153,42 +153,33 @@ func (c *Command) setOptions() error {
 
 	for i, arg := range remain {
 		for _, opt := range c.Options {
-			if opt.Value == nil {
-				for _, flag := range opt.Flags {
-					if match, _ := regexp.MatchString(arg, flag); match {
-						if opt.Value != nil {
-							switch val := opt.Value.(type) {
-							case []string:
-								if _, present := seen[remain[i+1]]; !present {
-									opt.Value = append(opt.Value.([]string), remain[i+1])
-									seen[remain[i+1]] = remain[i+1]
-								}
-							case string:
+			for _, flag := range opt.Flags {
+				if match, _ := regexp.MatchString(arg, flag); match {
+					if opt.Value != nil {
+						switch val := opt.Value.(type) {
+						case []string:
+							if _, present := seen[remain[i+1]]; !present {
+								opt.Value = append(opt.Value.([]string), remain[i+1])
+								seen[remain[i+1]] = remain[i+1]
+							}
+						case string:
+							if _, present := seen[remain[i+1]]; !present {
 								optArray := []string{val}
-								if _, present := seen[remain[i+1]]; !present {
-									seen[remain[i+1]] = remain[i+1]
-									optArray = append(optArray, remain[i+1])
-								}
+								seen[remain[i+1]] = remain[i+1]
+								optArray = append(optArray, remain[i+1])
 								opt.Value = optArray
 							}
-						} else {
-							if len(remain) >= i+2 {
-								if strings.Index(remain[i+1], "-") == 0 {
-									opt.Value = true
-								} else {
-									opt.Value = remain[i+1]
-									seen[remain[i+1]] = remain[i+1]
-								}
-							}
-							opt.Present = true
 						}
-					}
-				}
-			} else {
-				switch v := opt.Value.(type) {
-				case []string:
-					if len(v) == 1 {
-						opt.Value = opt.Value.([]string)[0]
+					} else {
+						if len(remain) >= i+2 {
+							if strings.Index(remain[i+1], "-") == 0 {
+								opt.Value = true
+							} else {
+								opt.Value = remain[i+1]
+								seen[remain[i+1]] = remain[i+1]
+							}
+						}
+						opt.Present = true
 					}
 				}
 			}
